@@ -1,0 +1,60 @@
+{
+  "id": "mygaia_single_floor",
+  "name": "MYGAIA Single Floor",
+  "version": "1.0.0",
+  "godot_version": "4.3",
+  "description": "Basic single floor MYGAIA level with foundation and 3 NPCs",
+  "icon": "\ud83c\udfe0",
+  "features": [
+    "Foundation system",
+    "Single floor (40x40)",
+    "3 NPCs (Hickory, Captain, Merchant)",
+    "Player character",
+    "Basic lighting",
+    "No GDScript errors"
+  ],
+  "structure": {
+    "floors": 1,
+    "npcs": [
+      "Hickory",
+      "Captain",
+      "Merchant"
+    ],
+    "has_stairs": false,
+    "has_player": true,
+    "floor_size": "40x40"
+  },
+  "files": {
+    "main_scene": "res://levels/main.tscn",
+    "player_scene": "res://characters/player.tscn",
+    "npc_scenes": [
+      "res://characters/hickory.tscn",
+      "res://characters/captain.tscn"
+    ]
+  },
+  "post_copy_patches": [
+    {
+      "file": "project.godot",
+      "type": "replace",
+      "find": "config/name=\"MYGAIA Single Floor\"",
+      "replace": "config/name=\"{{PROJECT_NAME}}\""
+    }
+  ],
+  "validation": {
+    "required_files": [
+      "project.godot",
+      "levels/main.tscn"
+    ],
+    "test_scenes": [
+      "levels/main.tscn"
+    ]
+  },
+  "main_scene": "scenes/mygaia_single_floor.tscn",
+  "has_sprites": true,
+  "has_chat": true,
+  "llm_integrated": true,
+  "npcs": [
+    "Captain (TinyLlama)",
+    "Hickory (Pygmalion)"
+  ]
+}
