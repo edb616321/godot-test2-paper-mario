@@ -20,6 +20,8 @@ var is_waiting_for_response: bool = false
 # Talksprite animation system
 var captain_talksprite_1: Texture2D  # NPC speaking (mouth open)
 var captain_talksprite_2: Texture2D  # Player typing (mouth closed/listening)
+var hickory_talksprite_1: Texture2D  # Hickory speaking
+var hickory_talksprite_2: Texture2D  # Hickory listening
 var current_talksprite_state: String = "idle"  # "idle", "npc_speaking", "player_typing"
 var talksprite_blend: float = 0.0  # 0 = fully sprite 2, 1 = fully sprite 1
 var target_blend: float = 0.0
@@ -32,6 +34,10 @@ func _ready():
 	# Load Captain's talksprites
 	captain_talksprite_1 = load("res://sprites/Captain_Talksprite_1.png")
 	captain_talksprite_2 = load("res://sprites/Captain_Talksprite_2.png")
+	
+	# Load Hickory's talksprites
+	hickory_talksprite_1 = load("res://sprites/Hickory_Talksprite_1.png")
+	hickory_talksprite_2 = load("res://sprites/Hickory_Talksprite_2.png")
 	
 	# Set player name (can be customized later)
 	player_name_label.text = "Player"
@@ -134,6 +140,12 @@ func open_chat(npc_name: String, _npc_texture: Texture2D = null):
 		current_talksprite_state = "npc_speaking"
 		talksprite_blend = 1.0
 		target_blend = 1.0
+	elif npc_name == "Hickory":
+		# Start with Hickory talksprite 1 (speaking for greeting)
+		npc_talksprite.texture = hickory_talksprite_1
+		current_talksprite_state = "npc_speaking"
+		talksprite_blend = 1.0
+		target_blend = 1.0
 	else:
 		# Use the NPC's actual sprite as talksprite
 		_set_default_talksprite(npc_name)
@@ -150,7 +162,7 @@ func open_chat(npc_name: String, _npc_texture: Texture2D = null):
 	_display_npc_message(greeting)
 	
 	# After greeting, switch to listening mode
-	if npc_name == "Captain":
+	if npc_name == "Captain" or npc_name == "Hickory":
 		await get_tree().create_timer(1.5).timeout  # Wait for greeting to be read
 		_set_talksprite_state("idle")
 	
@@ -164,10 +176,8 @@ func _set_default_talksprite(npc_name: String):
 			# Captain uses special talksprites
 			npc_talksprite.texture = captain_talksprite_2  # Start with listening face
 		"Hickory":
-			# Hickory uses his own walk sprite
-			var hickory_sprite = load("res://sprites/MYGAIA_Sprite_Hickory_Walk1.png")
-			if hickory_sprite:
-				npc_talksprite.texture = hickory_sprite
+			# Hickory uses special talksprites  
+			npc_talksprite.texture = hickory_talksprite_2  # Start with listening face
 		_:
 			# Default to base sprite
 			var base_sprite = load("res://sprites/MYGAIA_Sprite_Base_Walk1.png")
@@ -197,7 +207,7 @@ func _apply_blur_effect(enable: bool):
 
 func _on_player_typing(_new_text: String):
 	"""Called when player is typing"""
-	if current_npc_name == "Captain":
+	if current_npc_name == "Captain" or current_npc_name == "Hickory":
 		_set_talksprite_state("player_typing")
 
 func _on_player_input_submitted(text: String):
@@ -214,8 +224,8 @@ func _on_player_input_submitted(text: String):
 	# Use robust refocus after submit
 	call_deferred("_refocus_input_robust")
 	
-	# Switch to idle/waiting state for Captain
-	if current_npc_name == "Captain":
+	# Switch to idle/waiting state for Captain or Hickory
+	if current_npc_name == "Captain" or current_npc_name == "Hickory":
 		_set_talksprite_state("idle")
 	
 	# Send to LLM
@@ -232,8 +242,8 @@ func _display_npc_message(message: String):
 		dialogue_text.append_text("\n\n")
 	dialogue_text.append_text(message)
 	
-	# Set Captain to speaking state
-	if current_npc_name == "Captain":
+	# Set Captain or Hickory to speaking state
+	if current_npc_name == "Captain" or current_npc_name == "Hickory":
 		_set_talksprite_state("npc_speaking")
 		# After message is displayed, return to idle
 		await get_tree().create_timer(2.0).timeout
@@ -241,7 +251,7 @@ func _display_npc_message(message: String):
 
 func _set_talksprite_state(state: String):
 	"""Set the talksprite animation state"""
-	if current_npc_name != "Captain":
+	if current_npc_name != "Captain" and current_npc_name != "Hickory":
 		return
 		
 	current_talksprite_state = state
@@ -341,18 +351,31 @@ func _on_llm_response(_result: int, response_code: int, _headers: PackedStringAr
 
 func _process(delta):
 	"""Animate talksprites only - NO focus management here"""
-	if visible and current_npc_name == "Captain" and captain_talksprite_1 and captain_talksprite_2:
-		# Smooth transition between states
-		var blend_speed = 3.0  # Adjust for transition speed
-		talksprite_blend = lerp(talksprite_blend, target_blend, delta * blend_speed)
-		
-		# Switch texture based on blend value
-		if talksprite_blend > 0.5:
-			if npc_talksprite.texture != captain_talksprite_1:
-				npc_talksprite.texture = captain_talksprite_1
-		else:
-			if npc_talksprite.texture != captain_talksprite_2:
-				npc_talksprite.texture = captain_talksprite_2
+	if visible:
+		if current_npc_name == "Captain" and captain_talksprite_1 and captain_talksprite_2:
+			# Smooth transition between states
+			var blend_speed = 3.0  # Adjust for transition speed
+			talksprite_blend = lerp(talksprite_blend, target_blend, delta * blend_speed)
+			
+			# Switch texture based on blend value
+			if talksprite_blend > 0.5:
+				if npc_talksprite.texture != captain_talksprite_1:
+					npc_talksprite.texture = captain_talksprite_1
+			else:
+				if npc_talksprite.texture != captain_talksprite_2:
+					npc_talksprite.texture = captain_talksprite_2
+		elif current_npc_name == "Hickory" and hickory_talksprite_1 and hickory_talksprite_2:
+			# Smooth transition between states for Hickory
+			var blend_speed = 3.0  # Adjust for transition speed
+			talksprite_blend = lerp(talksprite_blend, target_blend, delta * blend_speed)
+			
+			# Switch texture based on blend value
+			if talksprite_blend > 0.5:
+				if npc_talksprite.texture != hickory_talksprite_1:
+					npc_talksprite.texture = hickory_talksprite_1
+			else:
+				if npc_talksprite.texture != hickory_talksprite_2:
+					npc_talksprite.texture = hickory_talksprite_2
 
 func _input(event):
 	if event.is_action_pressed("ui_cancel"):
