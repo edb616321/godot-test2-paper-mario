@@ -1,4 +1,4 @@
-[gd_scene load_steps=24 format=3]
+[gd_scene load_steps=26 format=3]
 
 [ext_resource type="Script" path="res://scripts/park_level_controller.gd" id="1"]
 [ext_resource type="PackedScene" path="res://scenes/ChatUI.tscn" id="10"]
@@ -6,6 +6,8 @@
 [ext_resource type="Script" path="res://scripts/NPCController_Hickory.gd" id="12"]
 [ext_resource type="Texture2D" path="res://sprites/MYGAIA_Sprite_Captain_Walk1.png" id="13"]
 [ext_resource type="Texture2D" path="res://sprites/MYGAIA_Sprite_Hickory_Walk1.png" id="14"]
+[ext_resource type="Script" path="res://scripts/player_park.gd" id="15"]
+[ext_resource type="Texture2D" path="res://sprites/MYGAIA_Sprite_Base_Idle1.png" id="16"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_1"]
 sky_top_color = Color(0.384, 0.627, 0.878, 1)
@@ -36,8 +38,11 @@ albedo_color = Color(0.2, 0.5, 0.2, 1)
 [sub_resource type="BoxShape3D" id="BoxShape3D_ground"]
 size = Vector3(128, 0.2, 128)
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_water"]
-size = Vector2(40, 40)
+[sub_resource type="CylinderMesh" id="PlaneMesh_water"]
+height = 0.5
+top_radius = 12.5
+bottom_radius = 12.5
+radial_segments = 32
 
 [sub_resource type="Shader" id="Shader_water"]
 code = "
@@ -73,11 +78,12 @@ shader = SubResource("Shader_water")
 shader_parameter/shallow_color = Color(0.3, 0.5, 0.7, 0.8)
 shader_parameter/deep_color = Color(0.1, 0.2, 0.4, 0.95)
 shader_parameter/wave_speed = 0.5
-shader_parameter/wave_amplitude = 0.05
-shader_parameter/transparency = 0.85
+shader_parameter/wave_amplitude = 0.08
+shader_parameter/transparency = 0.75
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_water"]
-size = Vector3(40, 2, 40)
+[sub_resource type="CylinderShape3D" id="BoxShape3D_water"]
+height = 2.0
+radius = 12.5
 
 [sub_resource type="BoxMesh" id="BoxMesh_platform"]
 size = Vector3(15, 0.5, 10)
@@ -137,10 +143,10 @@ surface_material_override/0 = SubResource("StandardMaterial3D_grass")
 shape = SubResource("BoxShape3D_ground")
 
 [node name="Pond" type="Node3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
 
 [node name="WaterSurface" type="MeshInstance3D" parent="Pond"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.2, 0)
 mesh = SubResource("PlaneMesh_water")
 surface_material_override/0 = SubResource("ShaderMaterial_water")
 
@@ -344,17 +350,53 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -40, 0, -40)
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, 0)
 collision_layer = 1
 
+[node name="MeshInstance3D" type="MeshInstance3D" parent="LayeredPlatforms/ViewingPlatform/Platform1"]
+mesh = SubResource("BoxMesh_platform")
+transform = Transform3D(0.6, 0, 0, 0, 0.3, 0, 0, 0, 0.6, 0, 0, 0)
+surface_material_override/0 = SubResource("StandardMaterial3D_wood")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="LayeredPlatforms/ViewingPlatform/Platform1"]
+shape = SubResource("BoxShape3D_platform")
+transform = Transform3D(0.6, 0, 0, 0, 0.3, 0, 0, 0, 0.6, 0, 0, 0)
+
 [node name="Platform2" type="StaticBody3D" parent="LayeredPlatforms/ViewingPlatform"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6, 0)
 collision_layer = 1
 
+[node name="MeshInstance3D" type="MeshInstance3D" parent="LayeredPlatforms/ViewingPlatform/Platform2"]
+mesh = SubResource("BoxMesh_platform")
+transform = Transform3D(0.7, 0, 0, 0, 0.3, 0, 0, 0, 0.7, 0, 0, 0)
+surface_material_override/0 = SubResource("StandardMaterial3D_wood")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="LayeredPlatforms/ViewingPlatform/Platform2"]
+shape = SubResource("BoxShape3D_platform")
+transform = Transform3D(0.7, 0, 0, 0, 0.3, 0, 0, 0, 0.7, 0, 0, 0)
+
 [node name="Stairs1" type="StaticBody3D" parent="LayeredPlatforms/ViewingPlatform"]
-transform = Transform3D(0.866, -0.5, 0, 0.5, 0.866, 0, 0, 0, 1, 5, 1.5, 0)
+transform = Transform3D(1, 0, 0, 0, 0.866, -0.5, 0, 0.5, 0.866, 0, 1.5, 0)
 collision_layer = 1
 
+[node name="MeshInstance3D" type="MeshInstance3D" parent="LayeredPlatforms/ViewingPlatform/Stairs1"]
+mesh = SubResource("BoxMesh_platform")
+transform = Transform3D(0.3, 0, 0, 0, 0.1, 0, 0, 0, 0.8, 0, 0, 0)
+surface_material_override/0 = SubResource("StandardMaterial3D_wood")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="LayeredPlatforms/ViewingPlatform/Stairs1"]
+shape = SubResource("BoxShape3D_platform")
+transform = Transform3D(0.3, 0, 0, 0, 0.1, 0, 0, 0, 0.8, 0, 0, 0)
+
 [node name="Stairs2" type="StaticBody3D" parent="LayeredPlatforms/ViewingPlatform"]
-transform = Transform3D(0.866, -0.5, 0, 0.5, 0.866, 0, 0, 0, 1, 5, 4.5, 0)
+transform = Transform3D(1, 0, 0, 0, 0.866, -0.5, 0, 0.5, 0.866, 0, 4.5, 0)
 collision_layer = 1
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="LayeredPlatforms/ViewingPlatform/Stairs2"]
+mesh = SubResource("BoxMesh_platform")
+transform = Transform3D(0.3, 0, 0, 0, 0.1, 0, 0, 0, 0.8, 0, 0, 0)
+surface_material_override/0 = SubResource("StandardMaterial3D_wood")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="LayeredPlatforms/ViewingPlatform/Stairs2"]
+shape = SubResource("BoxShape3D_platform")
+transform = Transform3D(0.3, 0, 0, 0, 0.1, 0, 0, 0, 0.8, 0, 0, 0)
 
 [node name="GazeboPlatform" type="Node3D" parent="LayeredPlatforms"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 40, 0, 40)
@@ -363,32 +405,63 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 40, 0, 40)
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0)
 collision_layer = 1
 
+[node name="MeshInstance3D" type="MeshInstance3D" parent="LayeredPlatforms/GazeboPlatform/Base"]
+mesh = SubResource("BoxMesh_platform")
+transform = Transform3D(0.8, 0, 0, 0, 0.2, 0, 0, 0, 0.8, 0, 0, 0)
+surface_material_override/0 = SubResource("StandardMaterial3D_wood")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="LayeredPlatforms/GazeboPlatform/Base"]
+shape = SubResource("BoxShape3D_platform")
+transform = Transform3D(0.8, 0, 0, 0, 0.2, 0, 0, 0, 0.8, 0, 0, 0)
+
 [node name="Roof" type="StaticBody3D" parent="LayeredPlatforms/GazeboPlatform"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5, 0)
 collision_layer = 1
 
+[node name="MeshInstance3D" type="MeshInstance3D" parent="LayeredPlatforms/GazeboPlatform/Roof"]
+mesh = SubResource("BoxMesh_platform")
+transform = Transform3D(1, 0, 0, 0, 0.1, 0, 0, 0, 1, 0, 0, 0)
+surface_material_override/0 = SubResource("StandardMaterial3D_wood")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="LayeredPlatforms/GazeboPlatform/Roof"]
+shape = SubResource("BoxShape3D_platform")
+transform = Transform3D(1, 0, 0, 0, 0.1, 0, 0, 0, 1, 0, 0, 0)
+
 [node name="Player" type="CharacterBody3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 10)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 20)
 collision_layer = 2
 collision_mask = 1
+script = ExtResource("15")
+
+[node name="Sprite3D" type="Sprite3D" parent="Player"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4, 0)
+billboard = 1
+texture_filter = 0
+texture = ExtResource("16")
+pixel_size = 0.010
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Player"]
 shape = SubResource("CapsuleShape3D_player")
 
+[node name="Shadow" type="MeshInstance3D" parent="Player"]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0.01, 0)
+mesh = SubResource("QuadMesh_shadow")
+surface_material_override/0 = SubResource("StandardMaterial3D_shadow")
+
 [node name="NPCs" type="Node3D" parent="."]
 
 [node name="Captain" type="CharacterBody3D" parent="NPCs"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15, 0, -5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15, 1, -5)
 collision_layer = 4
 collision_mask = 1
 script = ExtResource("11")
 
 [node name="Sprite3D" type="Sprite3D" parent="NPCs/Captain"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.4, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4, 0)
 billboard = 1
 texture_filter = 0
 texture = ExtResource("13")
-pixel_size = 0.001
+pixel_size = 0.010
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="NPCs/Captain"]
 shape = SubResource("CapsuleShape3D_npc")
@@ -406,17 +479,17 @@ collision_mask = 2
 shape = SubResource("SphereShape3D_interact")
 
 [node name="Hickory" type="CharacterBody3D" parent="NPCs"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -25, 0, -10)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -25, 1, -10)
 collision_layer = 4
 collision_mask = 1
 script = ExtResource("12")
 
 [node name="Sprite3D" type="Sprite3D" parent="NPCs/Hickory"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.4, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4, 0)
 billboard = 1
 texture_filter = 0
 texture = ExtResource("14")
-pixel_size = 0.001
+pixel_size = 0.010
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="NPCs/Hickory"]
 shape = SubResource("CapsuleShape3D_npc")

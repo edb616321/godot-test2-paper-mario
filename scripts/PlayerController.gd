@@ -5,7 +5,7 @@ const JUMP_VELOCITY = 4.5
 const INTERACT_DISTANCE = 3.0
 
 var gravity = ProjectSettings.get_setting("physics/3d/default_gravity")
-var sprite: AnimatedSprite3D
+var sprite: Node3D  # Can be Sprite3D or AnimatedSprite3D
 var chat_ui: Control = null
 var nearby_npc: CharacterBody3D = null
 var is_chatting: bool = false
@@ -13,13 +13,21 @@ var is_chatting: bool = false
 func _ready():
     add_to_group("player")
     
-    # Get the AnimatedSprite3D child
-    sprite = $AnimatedSprite3D
+    # Get the sprite child (either Sprite3D or AnimatedSprite3D)
+    sprite = get_node_or_null("Sprite3D")
+    if not sprite:
+        sprite = get_node_or_null("AnimatedSprite3D")
+    
     if sprite:
-        sprite.animation = "walk"
-        sprite.frame = 0  # Start with Idle1/Walk1 frame
-        sprite.stop()  # Start in idle state
-        sprite.flip_h = false  # Face forward/camera
+        # Only set animation properties if it's an AnimatedSprite3D
+        if sprite is AnimatedSprite3D:
+            sprite.animation = "walk"
+            sprite.frame = 0  # Start with Idle1/Walk1 frame
+            sprite.stop()  # Start in idle state
+            sprite.flip_h = false  # Face forward/camera
+        print("Player sprite found: ", sprite.get_class())
+    else:
+        push_error("Player: No Sprite3D or AnimatedSprite3D found!")
     
     # Load and instance the chat UI (deferred to avoid setup conflicts)
     call_deferred("_setup_chat_ui")
@@ -102,11 +110,17 @@ func _start_chat_with_npc(npc: CharacterBody3D):
     
     # Get NPC sprite texture if available
     var npc_texture = null
-    var npc_sprite = npc.get_node_or_null("AnimatedSprite3D")
-    if npc_sprite and npc_sprite.sprite_frames:
-        var frames = npc_sprite.sprite_frames.get_frame_texture("walk", 0)
-        if frames:
-            npc_texture = frames
+    var npc_sprite = npc.get_node_or_null("Sprite3D")
+    if not npc_sprite:
+        npc_sprite = npc.get_node_or_null("AnimatedSprite3D")
+    
+    if npc_sprite:
+        if npc_sprite is Sprite3D and npc_sprite.texture:
+            npc_texture = npc_sprite.texture
+        elif npc_sprite is AnimatedSprite3D and npc_sprite.sprite_frames:
+            var frames = npc_sprite.sprite_frames.get_frame_texture("walk", 0)
+            if frames:
+                npc_texture = frames
     
     # Open chat UI
     chat_ui.open_chat(npc_name, npc_texture)

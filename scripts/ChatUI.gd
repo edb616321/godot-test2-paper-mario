@@ -260,6 +260,8 @@ func _choose_sprite_for_message(message: String):
 func _set_talksprite_state(state: String):
 	"""DEPRECATED - Now using single sprite per message"""
 	# Keep for compatibility but don't use animation
+	# Use state parameter to avoid unused warning
+	var _unused = state
 	pass
 
 func _send_to_llm(message: String):

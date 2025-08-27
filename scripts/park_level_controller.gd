@@ -126,10 +126,10 @@ func _setup_trees():
 	for pos in tree_positions:
 		_create_tree(pos)
 
-func _create_tree(position: Vector3):
+func _create_tree(tree_position: Vector3):
 	"""Create a single tree at the given position"""
 	var tree = StaticBody3D.new()
-	tree.position = position
+	tree.position = tree_position
 	tree.collision_layer = 1
 	
 	# Tree trunk
@@ -175,23 +175,27 @@ func _create_tree(position: Vector3):
 	trees.add_child(tree)
 
 func _setup_bushes():
-	"""Create bushes with physics interaction"""
-	var bush_positions = [
-		Vector3(-15, 0, -15), Vector3(15, 0, -15),
-		Vector3(-15, 0, 15), Vector3(15, 0, 15),
-		Vector3(-25, 0, -5), Vector3(25, 0, -5),
-		Vector3(-25, 0, 5), Vector3(25, 0, 5),
-		Vector3(-5, 0, -25), Vector3(5, 0, -25),
-		Vector3(-5, 0, 25), Vector3(5, 0, 25)
-	]
+	"""Create bushes with physics interaction - circle around pond"""
+	# Create bushes ONLY in outer circle around the pond at origin
+	var num_bushes = 12
+	var radius = 16.0  # Distance from center - OUTSIDE the pond
+	var bush_positions = []
+	
+	for i in range(num_bushes):
+		var angle = (i * TAU) / num_bushes  # TAU = 2*PI
+		var x = sin(angle) * radius
+		var z = cos(angle) * radius
+		bush_positions.append(Vector3(x, 0, z))
+	
+	# NO INNER RING - keep center clear for water!
 	
 	for pos in bush_positions:
 		_create_interactive_bush(pos)
 
-func _create_interactive_bush(position: Vector3):
+func _create_interactive_bush(bush_position: Vector3):
 	"""Create a bush that shimmers when walked through"""
 	var bush = Area3D.new()
-	bush.position = position
+	bush.position = bush_position
 	bush.collision_layer = 16  # Unique layer for bushes
 	bush.collision_mask = 2  # Detect player
 	
@@ -224,7 +228,7 @@ func _create_interactive_bush(position: Vector3):
 	
 	# Store mesh instance reference for animation
 	bush.set_meta("mesh_instance", mesh_instance)
-	bush.set_meta("original_position", position)
+	bush.set_meta("original_position", bush_position)
 	bush.set_meta("shimmy_amount", 0.0)
 	
 	bushes.add_child(bush)
@@ -358,7 +362,7 @@ func _start_environmental_cycles():
 	add_child(weather_timer)
 
 func _physics_process(delta):
-	"""Handle physics-based movement and interactions"""
+	"""Handle physics-based interactions (NOT movement - player handles that)"""
 	if not player:
 		# Try to find or create player if missing
 		if has_node("Player"):
@@ -367,48 +371,8 @@ func _physics_process(delta):
 			_setup_player()
 		return
 	
-	# Get input
-	var input_vector = Vector2()
-	if Input.is_action_pressed("ui_left"):
-		input_vector.x -= 1
-	if Input.is_action_pressed("ui_right"):
-		input_vector.x += 1
-	if Input.is_action_pressed("ui_up"):
-		input_vector.y -= 1
-	if Input.is_action_pressed("ui_down"):
-		input_vector.y += 1
-	
-	input_vector = input_vector.normalized()
-	
-	# Calculate movement
-	var direction = Vector3()
-	direction.x = input_vector.x
-	direction.z = input_vector.y
-	
-	# Apply speed modifier if in water
-	var current_speed = WATER_MOVE_SPEED if is_in_water else MOVE_SPEED
-	
-	# Move player
-	if direction.length() > 0:
-		player.velocity.x = direction.x * current_speed
-		player.velocity.z = direction.z * current_speed
-	else:
-		player.velocity.x = move_toward(player.velocity.x, 0, current_speed * delta)
-		player.velocity.z = move_toward(player.velocity.z, 0, current_speed * delta)
-	
-	# Apply gravity
-	if not player.is_on_floor():
-		player.velocity.y += GRAVITY * delta
-	
-	# Handle jump
-	if Input.is_action_just_pressed("ui_accept") and player.is_on_floor():
-		var jump_force = JUMP_VELOCITY
-		if is_in_water:
-			jump_force *= WATER_JUMP_MULTIPLIER
-		player.velocity.y = jump_force
-	
-	# Move and slide
-	player.move_and_slide()
+	# Player movement is handled by player_park.gd script
+	# We only handle camera and environmental effects here
 	
 	# Update camera to follow player
 	_update_camera(delta)
@@ -503,10 +467,10 @@ func _on_bush_exited(body, bush):
 	if body == player:
 		nearby_bushes.erase(bush)
 
-func _create_water_splash(position: Vector3):
+func _create_water_splash(splash_position: Vector3):
 	"""Create water splash particle effect"""
 	var splash = CPUParticles3D.new()
-	splash.position = position
+	splash.position = splash_position
 	splash.amount = 30
 	splash.lifetime = 0.5
 	splash.one_shot = true

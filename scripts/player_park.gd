@@ -35,7 +35,7 @@ func _ready():
 	# Load player sprites
 	idle_texture = load("res://sprites/MYGAIA_Sprite_Base_Idle1.png")
 	walk_texture_1 = load("res://sprites/MYGAIA_Sprite_Base_Walk1.png")
-	walk_texture_2 = load("res://sprites/MYGAIA_Sprite_Base_Walk1.png")  # Can alternate if we have more frames
+	walk_texture_2 = load("res://sprites/MYGAIA_Sprite_Base_Idle1.png")  # Use Idle1 as second frame for walk animation
 	
 	# Setup sprite if it doesn't exist
 	if not sprite:
@@ -55,11 +55,11 @@ func _setup_sprite():
 	sprite.name = "Sprite3D"
 	sprite.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 	sprite.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
-	sprite.pixel_size = 0.001  # Standard pixel size for MYGAIA sprites
+	sprite.pixel_size = 0.01  # Standard pixel size for MYGAIA sprites
 	
 	# Auto-alignment formula: sprite_offset_y = (sprite_height * pixel_size) / 2.0
-	# For 800-pixel tall sprites: (800 * 0.001) / 2.0 = 0.4
-	sprite.position.y = 0.4  # Properly aligned to ground
+	# For 800-pixel tall sprites: (800 * 0.01) / 2.0 = 4.0
+	sprite.position.y = 4.0  # Properly aligned to ground
 	
 	if idle_texture:
 		sprite.texture = idle_texture
@@ -145,28 +145,32 @@ func _update_animation(delta):
 		return
 	
 	if is_moving:
-		# Walking animation
-		animation_timer += delta * 8.0  # Animation speed
+		# Walking animation - switch textures at a good walking speed
+		animation_timer += delta * 4.0  # Slower animation speed for walking
 		if animation_timer > 1.0:
 			animation_timer = 0.0
 			current_frame = 1 - current_frame  # Toggle between 0 and 1
 			
+			# Alternate between Walk1 and Walk2 textures
 			if current_frame == 0:
 				sprite.texture = walk_texture_1
 			else:
-				sprite.texture = walk_texture_2 if walk_texture_2 else walk_texture_1
+				sprite.texture = walk_texture_2
+			
+			# Debug to confirm textures are switching
+			#print("Player frame: ", current_frame, " texture: ", sprite.texture.resource_path)
 	else:
-		# Idle
+		# Idle - use idle texture
 		sprite.texture = idle_texture
 		current_frame = 0
 		animation_timer = 0.0
 	
-	# Flip sprite based on direction
+	# Flip sprite based on direction (REVERSED for proper facing)
 	if sprite:
 		if facing_direction.x < 0:
-			sprite.flip_h = true
+			sprite.flip_h = false  # Face left when moving left
 		elif facing_direction.x > 0:
-			sprite.flip_h = false
+			sprite.flip_h = true   # Face right when moving right
 
 func _check_interactions():
 	"""Check for nearby interactable objects"""

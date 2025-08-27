@@ -14,6 +14,15 @@ config/name="Template1 - Park Level"
 run/main_scene="res://scenes/park_level.tscn"
 config/features=PackedStringArray("4.4")
 
+[autoload]
+
+GodotLogger="*res://scripts/GodotLogger.gd"
+ErrorLogger="*res://scripts/ErrorLogger.gd"
+
+[debug]
+
+settings/stdout/verbose_stdout=true
+
 [input]
 
 ui_left={

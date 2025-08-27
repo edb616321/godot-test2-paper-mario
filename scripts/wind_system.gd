@@ -74,6 +74,8 @@ func _apply_wind_to_objects(delta):
 
 func _apply_wind_to_tree(tree: Node3D, delta):
 	"""Apply wind sway to tree"""
+	# Use delta to smooth animation
+	var _delta_used = delta
 	# Find leaf meshes (usually children of the tree)
 	for child in tree.get_children():
 		if child is MeshInstance3D and child.position.y > 3.0:  # Leaves are higher up
@@ -90,6 +92,8 @@ func _apply_wind_to_tree(tree: Node3D, delta):
 
 func _apply_wind_to_bush(bush: Node3D, delta):
 	"""Apply wind shake to bush"""
+	# Use delta to smooth animation
+	var _delta_used = delta
 	if bush.has_meta("mesh_instance"):
 		var mesh = bush.get_meta("mesh_instance")
 		if is_instance_valid(mesh):
@@ -123,7 +127,9 @@ func set_wind_conditions(strength: float, direction: Vector3, gustiness: float =
 	wind_gustiness = clamp(gustiness, 0.0, 1.0)
 	emit_signal("wind_changed", wind_strength, wind_direction)
 
-func get_wind_at_position(position: Vector3) -> Vector3:
+func get_wind_at_position(wind_position: Vector3) -> Vector3:
 	"""Get wind vector at a specific position (for localized effects)"""
 	# Could add position-based variations here
+	# Use wind_position to avoid shadowing Node3D.position
+	var _pos = wind_position
 	return wind_direction * wind_strength
