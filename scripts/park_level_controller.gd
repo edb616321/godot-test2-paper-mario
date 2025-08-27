@@ -61,30 +61,28 @@ func _ready():
 	emit_signal("level_loaded")
 
 func _setup_player():
-	"""Initialize player character"""
+	"""Initialize player character with sprite system"""
 	# Check if Player node exists in scene
 	if has_node("Player"):
 		player = $Player
 		print("Using existing player from scene")
+		
+		# Add the park player script if not already attached
+		if not player.has_method("set_water_state"):
+			var player_script = load("res://scripts/player_park.gd")
+			if player_script:
+				player.set_script(player_script)
 	else:
 		print("Creating player character dynamically...")
 		player = CharacterBody3D.new()
 		player.name = "Player"
+		
+		# Add the park player script
+		var player_script = load("res://scripts/player_park.gd")
+		if player_script:
+			player.set_script(player_script)
+		
 		add_child(player)
-		
-		# Add mesh
-		var mesh_instance = MeshInstance3D.new()
-		var capsule_mesh = CapsuleMesh.new()
-		capsule_mesh.height = 2.0
-		capsule_mesh.radius = 0.5
-		mesh_instance.mesh = capsule_mesh
-		
-		# Create a material for the player
-		var player_material = StandardMaterial3D.new()
-		player_material.albedo_color = Color(0.2, 0.3, 0.7, 1.0)  # Blue player
-		mesh_instance.material_override = player_material
-		
-		player.add_child(mesh_instance)
 		
 		# Add collision
 		var collision_shape = CollisionShape3D.new()
@@ -97,11 +95,15 @@ func _setup_player():
 		# Position player above ground
 		player.position = Vector3(0, 2, 10)
 		player.collision_layer = 2
-		player.collision_mask = 5  # Collide with world and water
+		player.collision_mask = 1  # Collide with world
 	
 	# Ensure player is valid
 	if player:
 		print("Player initialized at position: ", player.position)
+		
+		# Connect player signals
+		if player.has_signal("player_interacted"):
+			player.player_interacted.connect(_on_player_interacted)
 
 func _setup_trees():
 	"""Create tree instances around the park"""
@@ -330,6 +332,12 @@ func _setup_wind_system():
 
 func _start_environmental_cycles():
 	"""Start time of day and weather cycles"""
+	# Create weather system
+	var weather_system = Node3D.new()
+	weather_system.name = "WeatherSystem"
+	weather_system.set_script(load("res://scripts/weather_system.gd"))
+	add_child(weather_system)
+	
 	# Create a timer for day/night cycle
 	var day_cycle_timer = Timer.new()
 	day_cycle_timer.wait_time = 60.0  # 1 minute = 1 game hour
@@ -454,8 +462,15 @@ func _on_water_entered(body):
 		emit_signal("player_entered_water")
 		print("Player entered water - movement slowed")
 		
+		# Update player water state
+		if player.has_method("set_water_state"):
+			player.set_water_state(true)
+		
 		# Add water splash effect
-		_create_water_splash(player.position)
+		_create_water_splash(player.global_position)
+		
+		# Add water ripple effect
+		_start_water_ripples()
 
 func _on_water_exited(body):
 	"""Handle player exiting water"""
@@ -463,6 +478,13 @@ func _on_water_exited(body):
 		is_in_water = false
 		emit_signal("player_exited_water")
 		print("Player exited water - normal movement restored")
+		
+		# Update player water state
+		if player.has_method("set_water_state"):
+			player.set_water_state(false)
+		
+		# Stop water ripples
+		_stop_water_ripples()
 
 func _on_bush_entered(body, bush):
 	"""Handle player entering bush area"""
@@ -551,6 +573,12 @@ func _update_time_of_day():
 
 func _change_weather():
 	"""Randomly change weather conditions"""
+	# Change weather patterns
+	var weather = $WeatherSystem
+	if weather and weather.has_method("cycle_weather"):
+		weather.cycle_weather()
+	
+	# Also update wind
 	var wind = $WindSystem
 	if wind:
 		var new_strength = randf_range(0.5, 2.5)
@@ -562,4 +590,34 @@ func _change_weather():
 		var new_gustiness = randf_range(0.1, 0.6)
 		
 		wind.set_wind_conditions(new_strength, new_direction, new_gustiness)
-		print("Weather changed - Wind: ", new_strength)
+		
+		# Stronger wind during storms
+		if weather and weather.has_method("get_weather_name"):
+			var weather_name = weather.get_weather_name()
+			if weather_name == "STORMY":
+				new_strength *= 2.0
+				wind.set_wind_conditions(new_strength, new_direction, 0.8)
+
+func _start_water_ripples():
+	"""Start water ripple effect when player is in water"""
+	# This could animate the water shader parameters
+	var water_surface = $Pond/WaterSurface if has_node("Pond/WaterSurface") else null
+	if water_surface and water_surface.material_override:
+		var mat = water_surface.material_override
+		if mat.has_method("set_shader_parameter"):
+			mat.set_shader_parameter("wave_amplitude", 0.1)
+			mat.set_shader_parameter("wave_speed", 0.8)
+
+func _stop_water_ripples():
+	"""Stop water ripple effect when player exits water"""
+	var water_surface = $Pond/WaterSurface if has_node("Pond/WaterSurface") else null
+	if water_surface and water_surface.material_override:
+		var mat = water_surface.material_override
+		if mat.has_method("set_shader_parameter"):
+			mat.set_shader_parameter("wave_amplitude", 0.05)
+			mat.set_shader_parameter("wave_speed", 0.5)
+
+func _on_player_interacted():
+	"""Handle player interaction attempts"""
+	print("Player attempted interaction")
+	# This would check for nearby NPCs, benches, etc.

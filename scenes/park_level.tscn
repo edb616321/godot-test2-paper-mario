@@ -204,6 +204,119 @@ collision_layer = 1
 
 [node name="LayeredPlatforms" type="Node3D" parent="."]
 
+[node name="JumpingPlatforms" type="Node3D" parent="LayeredPlatforms"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20, 0, 0)
+
+[node name="Platform1" type="StaticBody3D" parent="LayeredPlatforms/JumpingPlatforms"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+collision_layer = 1
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="LayeredPlatforms/JumpingPlatforms/Platform1"]
+mesh = SubResource("BoxMesh_platform")
+transform = Transform3D(0.3, 0, 0, 0, 0.5, 0, 0, 0, 0.3, 0, 0, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="LayeredPlatforms/JumpingPlatforms/Platform1"]
+shape = SubResource("BoxShape3D_platform")
+transform = Transform3D(0.3, 0, 0, 0, 0.5, 0, 0, 0, 0.3, 0, 0, 0)
+
+[node name="Platform2" type="StaticBody3D" parent="LayeredPlatforms/JumpingPlatforms"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 2.5, 0)
+collision_layer = 1
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="LayeredPlatforms/JumpingPlatforms/Platform2"]
+mesh = SubResource("BoxMesh_platform")
+transform = Transform3D(0.3, 0, 0, 0, 0.5, 0, 0, 0, 0.3, 0, 0, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="LayeredPlatforms/JumpingPlatforms/Platform2"]
+shape = SubResource("BoxShape3D_platform")
+transform = Transform3D(0.3, 0, 0, 0, 0.5, 0, 0, 0, 0.3, 0, 0, 0)
+
+[node name="Platform3" type="StaticBody3D" parent="LayeredPlatforms/JumpingPlatforms"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 4, 0)
+collision_layer = 1
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="LayeredPlatforms/JumpingPlatforms/Platform3"]
+mesh = SubResource("BoxMesh_platform")
+transform = Transform3D(0.3, 0, 0, 0, 0.5, 0, 0, 0, 0.3, 0, 0, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="LayeredPlatforms/JumpingPlatforms/Platform3"]
+shape = SubResource("BoxShape3D_platform")
+transform = Transform3D(0.3, 0, 0, 0, 0.5, 0, 0, 0, 0.3, 0, 0, 0)
+
+[node name="Platform4" type="StaticBody3D" parent="LayeredPlatforms/JumpingPlatforms"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9, 6, 0)
+collision_layer = 1
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="LayeredPlatforms/JumpingPlatforms/Platform4"]
+mesh = SubResource("BoxMesh_platform")
+transform = Transform3D(0.4, 0, 0, 0, 0.5, 0, 0, 0, 0.4, 0, 0, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="LayeredPlatforms/JumpingPlatforms/Platform4"]
+shape = SubResource("BoxShape3D_platform")
+transform = Transform3D(0.4, 0, 0, 0, 0.5, 0, 0, 0, 0.4, 0, 0, 0)
+
+[node name="SpiralTower" type="Node3D" parent="LayeredPlatforms"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 0, -20)
+
+[node name="Base" type="StaticBody3D" parent="LayeredPlatforms/SpiralTower"]
+collision_layer = 1
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="LayeredPlatforms/SpiralTower/Base"]
+mesh = SubResource("BoxMesh_platform")
+transform = Transform3D(0.5, 0, 0, 0, 0.2, 0, 0, 0, 0.5, 0, 0, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="LayeredPlatforms/SpiralTower/Base"]
+shape = SubResource("BoxShape3D_platform")
+transform = Transform3D(0.5, 0, 0, 0, 0.2, 0, 0, 0, 0.5, 0, 0, 0)
+
+[node name="Step1" type="StaticBody3D" parent="LayeredPlatforms/SpiralTower"]
+transform = Transform3D(0.866, 0, 0.5, 0, 1, 0, -0.5, 0, 0.866, 3, 1.5, 0)
+collision_layer = 1
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="LayeredPlatforms/SpiralTower/Step1"]
+mesh = SubResource("BoxMesh_platform")
+transform = Transform3D(0.3, 0, 0, 0, 0.2, 0, 0, 0, 0.2, 0, 0, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="LayeredPlatforms/SpiralTower/Step1"]
+shape = SubResource("BoxShape3D_platform")
+transform = Transform3D(0.3, 0, 0, 0, 0.2, 0, 0, 0, 0.2, 0, 0, 0)
+
+[node name="Step2" type="StaticBody3D" parent="LayeredPlatforms/SpiralTower"]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 0, 3, 3)
+collision_layer = 1
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="LayeredPlatforms/SpiralTower/Step2"]
+mesh = SubResource("BoxMesh_platform")
+transform = Transform3D(0.3, 0, 0, 0, 0.2, 0, 0, 0, 0.2, 0, 0, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="LayeredPlatforms/SpiralTower/Step2"]
+shape = SubResource("BoxShape3D_platform")
+transform = Transform3D(0.3, 0, 0, 0, 0.2, 0, 0, 0, 0.2, 0, 0, 0)
+
+[node name="Step3" type="StaticBody3D" parent="LayeredPlatforms/SpiralTower"]
+transform = Transform3D(-0.866, 0, 0.5, 0, 1, 0, -0.5, 0, -0.866, -3, 4.5, 0)
+collision_layer = 1
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="LayeredPlatforms/SpiralTower/Step3"]
+mesh = SubResource("BoxMesh_platform")
+transform = Transform3D(0.3, 0, 0, 0, 0.2, 0, 0, 0, 0.2, 0, 0, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="LayeredPlatforms/SpiralTower/Step3"]
+shape = SubResource("BoxShape3D_platform")
+transform = Transform3D(0.3, 0, 0, 0, 0.2, 0, 0, 0, 0.2, 0, 0, 0)
+
+[node name="Top" type="StaticBody3D" parent="LayeredPlatforms/SpiralTower"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6, 0)
+collision_layer = 1
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="LayeredPlatforms/SpiralTower/Top"]
+mesh = SubResource("BoxMesh_platform")
+transform = Transform3D(0.4, 0, 0, 0, 0.2, 0, 0, 0, 0.4, 0, 0, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="LayeredPlatforms/SpiralTower/Top"]
+shape = SubResource("BoxShape3D_platform")
+transform = Transform3D(0.4, 0, 0, 0, 0.2, 0, 0, 0, 0.4, 0, 0, 0)
+
 [node name="ViewingPlatform" type="Node3D" parent="LayeredPlatforms"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -40, 0, -40)
 
@@ -244,3 +357,7 @@ mesh = SubResource("CapsuleMesh_player")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Player"]
 shape = SubResource("CapsuleShape3D_player")
+
+[node name="NPCs" type="Node3D" parent="."]
+
+[node name="ChatUI" type="Control" parent="."]
