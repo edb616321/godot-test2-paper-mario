@@ -10,8 +10,8 @@ config_version=5
 
 [application]
 
-config/name="MYGAIA Single Floor"
-run/main_scene="res://scenes/mygaia_single_floor.tscn"
+config/name="Template1 - Park Level"
+run/main_scene="res://scenes/park_level.tscn"
 config/features=PackedStringArray("4.4")
 
 [input]
