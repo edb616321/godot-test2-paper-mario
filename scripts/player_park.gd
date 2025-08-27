@@ -55,8 +55,11 @@ func _setup_sprite():
 	sprite.name = "Sprite3D"
 	sprite.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 	sprite.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
-	sprite.position.y = 1.0  # Center of capsule
-	sprite.pixel_size = 0.02  # Adjust for proper size
+	sprite.pixel_size = 0.001  # Standard pixel size for MYGAIA sprites
+	
+	# Auto-alignment formula: sprite_offset_y = (sprite_height * pixel_size) / 2.0
+	# For 800-pixel tall sprites: (800 * 0.001) / 2.0 = 0.4
+	sprite.position.y = 0.4  # Properly aligned to ground
 	
 	if idle_texture:
 		sprite.texture = idle_texture
@@ -69,7 +72,7 @@ func _setup_shadow():
 	shadow.name = "Shadow"
 	
 	var shadow_mesh = QuadMesh.new()
-	shadow_mesh.size = Vector2(1.5, 1.5)
+	shadow_mesh.size = Vector2(0.8, 0.8)  # Smaller shadow for sprite
 	shadow.mesh = shadow_mesh
 	
 	var shadow_material = StandardMaterial3D.new()
@@ -78,7 +81,7 @@ func _setup_shadow():
 	shadow_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	shadow.material_override = shadow_material
 	
-	shadow.position.y = -0.98  # Just above ground
+	shadow.position.y = 0.01  # Just above ground level
 	shadow.rotation.x = -PI/2  # Flat on ground
 	
 	add_child(shadow)
