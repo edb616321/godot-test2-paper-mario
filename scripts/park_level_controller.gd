@@ -5,9 +5,9 @@ signal level_loaded
 signal player_entered_water
 signal player_exited_water
 
-@onready var player = $Player
+@onready var player = null  # Will be created dynamically
 @onready var camera = $Camera3D
-@onready var pond_water_area = $Pond/WaterArea
+@onready var pond_water_area = $Pond/WaterArea if has_node("Pond/WaterArea") else null
 @onready var particle_effects = $ParticleEffects
 @onready var trees = $Trees
 @onready var bushes = $Bushes
@@ -62,8 +62,12 @@ func _ready():
 
 func _setup_player():
 	"""Initialize player character"""
-	if not player:
-		print("Creating player character...")
+	# Check if Player node exists in scene
+	if has_node("Player"):
+		player = $Player
+		print("Using existing player from scene")
+	else:
+		print("Creating player character dynamically...")
 		player = CharacterBody3D.new()
 		player.name = "Player"
 		add_child(player)
@@ -74,6 +78,12 @@ func _setup_player():
 		capsule_mesh.height = 2.0
 		capsule_mesh.radius = 0.5
 		mesh_instance.mesh = capsule_mesh
+		
+		# Create a material for the player
+		var player_material = StandardMaterial3D.new()
+		player_material.albedo_color = Color(0.2, 0.3, 0.7, 1.0)  # Blue player
+		mesh_instance.material_override = player_material
+		
 		player.add_child(mesh_instance)
 		
 		# Add collision
@@ -84,10 +94,14 @@ func _setup_player():
 		collision_shape.shape = capsule_shape
 		player.add_child(collision_shape)
 		
-		# Position player
-		player.position = Vector3(0, 1, 10)
+		# Position player above ground
+		player.position = Vector3(0, 2, 10)
 		player.collision_layer = 2
 		player.collision_mask = 5  # Collide with world and water
+	
+	# Ensure player is valid
+	if player:
+		print("Player initialized at position: ", player.position)
 
 func _setup_trees():
 	"""Create tree instances around the park"""
@@ -333,6 +347,11 @@ func _start_environmental_cycles():
 func _physics_process(delta):
 	"""Handle physics-based movement and interactions"""
 	if not player:
+		# Try to find or create player if missing
+		if has_node("Player"):
+			player = $Player
+		else:
+			_setup_player()
 		return
 	
 	# Get input
@@ -399,9 +418,19 @@ func _update_camera(delta):
 	var cam_x = sin(camera_rotation) * camera_distance
 	var cam_z = cos(camera_rotation) * camera_distance
 	
-	var target_pos = player.position + Vector3(cam_x, camera_height, cam_z)
+	# Ensure camera stays above minimum height
+	var player_pos = player.global_position if player else Vector3(0, 1, 10)
+	var target_pos = player_pos + Vector3(cam_x, camera_height, cam_z)
+	
+	# Clamp camera height to avoid going below ground
+	target_pos.y = max(target_pos.y, 5.0)
+	
+	# Smooth camera movement
 	camera.position = camera.position.lerp(target_pos, 5.0 * delta)
-	camera.look_at(player.position + Vector3(0, 1, 0), Vector3.UP)
+	
+	# Look at player position
+	var look_target = player_pos + Vector3(0, 1, 0)
+	camera.look_at(look_target, Vector3.UP)
 
 func _update_bush_physics(delta):
 	"""Update shimmy effect for bushes player is moving through"""
