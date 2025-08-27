@@ -1,6 +1,11 @@
-[gd_scene load_steps=15 format=3]
+[gd_scene load_steps=24 format=3]
 
 [ext_resource type="Script" path="res://scripts/park_level_controller.gd" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/ChatUI.tscn" id="10"]
+[ext_resource type="Script" path="res://scripts/NPCController_Captain.gd" id="11"]
+[ext_resource type="Script" path="res://scripts/NPCController_Hickory.gd" id="12"]
+[ext_resource type="Texture2D" path="res://sprites/MYGAIA_Sprite_Captain_Walk1.png" id="13"]
+[ext_resource type="Texture2D" path="res://sprites/MYGAIA_Sprite_Hickory_Walk1.png" id="14"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_1"]
 sky_top_color = Color(0.384, 0.627, 0.878, 1)
@@ -90,6 +95,21 @@ radius = 0.5
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_player"]
 height = 2.0
 radius = 0.5
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_npc"]
+height = 2.0
+radius = 0.5
+
+[sub_resource type="QuadMesh" id="QuadMesh_shadow"]
+size = Vector2(1.5, 1.5)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_shadow"]
+albedo_color = Color(0, 0, 0, 0.3)
+transparency = 1
+shading_mode = 0
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_interact"]
+radius = 2.0
 
 [node name="ParkLevel" type="Node3D"]
 script = ExtResource("1")
@@ -360,4 +380,61 @@ shape = SubResource("CapsuleShape3D_player")
 
 [node name="NPCs" type="Node3D" parent="."]
 
-[node name="ChatUI" type="Control" parent="."]
+[node name="Captain" type="CharacterBody3D" parent="NPCs"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15, 1, -5)
+collision_layer = 4
+collision_mask = 1
+script = ExtResource("11")
+
+[node name="Sprite3D" type="Sprite3D" parent="NPCs/Captain"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+billboard = 1
+texture_filter = 0
+texture = ExtResource("13")
+pixel_size = 0.02
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="NPCs/Captain"]
+shape = SubResource("CapsuleShape3D_npc")
+
+[node name="Shadow" type="MeshInstance3D" parent="NPCs/Captain"]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, -0.98, 0)
+mesh = SubResource("QuadMesh_shadow")
+surface_material_override/0 = SubResource("StandardMaterial3D_shadow")
+
+[node name="InteractionArea" type="Area3D" parent="NPCs/Captain"]
+collision_layer = 0
+collision_mask = 2
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="NPCs/Captain/InteractionArea"]
+shape = SubResource("SphereShape3D_interact")
+
+[node name="Hickory" type="CharacterBody3D" parent="NPCs"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -25, 1, -10)
+collision_layer = 4
+collision_mask = 1
+script = ExtResource("12")
+
+[node name="Sprite3D" type="Sprite3D" parent="NPCs/Hickory"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+billboard = 1
+texture_filter = 0
+texture = ExtResource("14")
+pixel_size = 0.02
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="NPCs/Hickory"]
+shape = SubResource("CapsuleShape3D_npc")
+
+[node name="Shadow" type="MeshInstance3D" parent="NPCs/Hickory"]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, -0.98, 0)
+mesh = SubResource("QuadMesh_shadow")
+surface_material_override/0 = SubResource("StandardMaterial3D_shadow")
+
+[node name="InteractionArea" type="Area3D" parent="NPCs/Hickory"]
+collision_layer = 0
+collision_mask = 2
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="NPCs/Hickory/InteractionArea"]
+shape = SubResource("SphereShape3D_interact")
+
+[node name="ChatUI" parent="." instance=ExtResource("10")]
+visible = false

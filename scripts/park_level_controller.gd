@@ -11,6 +11,8 @@ signal player_exited_water
 @onready var particle_effects = $ParticleEffects
 @onready var trees = $Trees
 @onready var bushes = $Bushes
+@onready var chat_ui = $ChatUI if has_node("ChatUI") else null
+@onready var npcs = $NPCs if has_node("NPCs") else null
 
 # Player movement
 const MOVE_SPEED = 8.0
@@ -51,6 +53,9 @@ func _ready():
 	
 	# Initialize player
 	_setup_player()
+	
+	# Setup NPCs
+	_setup_npcs()
 	
 	# Setup wind system
 	_setup_wind_system()
@@ -617,7 +622,74 @@ func _stop_water_ripples():
 			mat.set_shader_parameter("wave_amplitude", 0.05)
 			mat.set_shader_parameter("wave_speed", 0.5)
 
+func _setup_npcs():
+	"""Setup NPC interactions"""
+	if not npcs:
+		return
+	
+	# Connect interaction areas for each NPC
+	for npc in npcs.get_children():
+		if npc.has_node("InteractionArea"):
+			var area = npc.get_node("InteractionArea")
+			area.body_entered.connect(_on_npc_interaction_area_entered.bind(npc))
+			area.body_exited.connect(_on_npc_interaction_area_exited.bind(npc))
+			print("Connected interaction for NPC: ", npc.name)
+
 func _on_player_interacted():
 	"""Handle player interaction attempts"""
 	print("Player attempted interaction")
-	# This would check for nearby NPCs, benches, etc.
+	
+	# Check if player is near any NPC
+	for npc in npcs.get_children():
+		var distance = player.global_position.distance_to(npc.global_position)
+		if distance < 3.0:  # Within interaction range
+			_start_npc_conversation(npc)
+			break
+
+func _on_npc_interaction_area_entered(body, npc):
+	"""Handle player entering NPC interaction zone"""
+	if body == player:
+		print("Player near ", npc.name, " - Press E to interact")
+		# Could show interaction prompt here
+
+func _on_npc_interaction_area_exited(body, npc):
+	"""Handle player leaving NPC interaction zone"""
+	if body == player:
+		print("Player left ", npc.name, " interaction area")
+		# Hide interaction prompt
+
+func _start_npc_conversation(npc):
+	"""Start conversation with an NPC"""
+	if not chat_ui:
+		print("ChatUI not found!")
+		return
+	
+	print("Starting conversation with ", npc.name)
+	
+	# Stop player movement during conversation
+	if player and player.has_method("set_process"):
+		player.set_process(false)
+		player.set_physics_process(false)
+	
+	# Get NPC texture for chat display
+	var npc_texture = null
+	if npc.has_node("Sprite3D"):
+		var sprite = npc.get_node("Sprite3D")
+		npc_texture = sprite.texture
+	
+	# Open chat UI with NPC
+	if chat_ui.has_method("open_chat"):
+		chat_ui.open_chat(npc.name, npc_texture)
+	
+	# Connect to chat closed signal if not already connected
+	if not chat_ui.is_connected("chat_closed", _on_chat_closed):
+		chat_ui.chat_closed.connect(_on_chat_closed)
+
+func _on_chat_closed():
+	"""Handle chat UI being closed"""
+	print("Chat closed, resuming player control")
+	
+	# Resume player movement
+	if player:
+		player.set_process(true)
+		player.set_physics_process(true)

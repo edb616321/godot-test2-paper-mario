@@ -167,21 +167,10 @@ func _update_animation(delta):
 
 func _check_interactions():
 	"""Check for nearby interactable objects"""
+	# Emit signal for the park controller to handle
 	emit_signal("player_interacted")
 	
-	# Check for NPCs in range
-	var space_state = get_world_3d().direct_space_state
-	var query = PhysicsRayQueryParameters3D.create(
-		global_position,
-		global_position + facing_direction * 2.0
-	)
-	query.collision_mask = 4  # NPCs are on layer 3
-	
-	var result = space_state.intersect_ray(query)
-	if result:
-		var collider = result.collider
-		if collider.has_method("interact"):
-			collider.interact()
+	# The park_level_controller will handle finding nearby NPCs and starting conversations
 
 func set_water_state(in_water: bool):
 	"""Update water state"""
