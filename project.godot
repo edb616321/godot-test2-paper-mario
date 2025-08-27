@@ -22,7 +22,6 @@ ErrorLogger="*res://scripts/ErrorLogger.gd"
 [debug]
 
 settings/stdout/verbose_stdout=true
-
 [input]
 
 ui_left={
